@@ -27,12 +27,20 @@ export type Cell = {
   totalCorrect: number;
 };
 
+export type SessionRecord = {
+  date: string;          // ISO date "2026-05-03"
+  questions: number;
+  correct: number;
+  avgResponseTimeMs: number;
+};
+
 export type AppState = {
   cells: Record<string, Cell>;
   totalSessionsCompleted: number;
   totalQuestionsAnswered: number;
   totalTimeMs: number;
   lastSessionDate: string | null;
+  sessionHistory: SessionRecord[];
 };
 
 export function getNoteForCell(str: number, fret: number): string {
@@ -67,6 +75,7 @@ export function initAppState(): AppState {
     totalQuestionsAnswered: 0,
     totalTimeMs: 0,
     lastSessionDate: null,
+    sessionHistory: [],
   };
 }
 

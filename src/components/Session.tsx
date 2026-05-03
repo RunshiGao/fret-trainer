@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { AppState, Cell, Attempt } from '../data/fretboard';
+import type { AppState, Cell, Attempt, SessionRecord } from '../data/fretboard';
 import { NOTE_NAMES } from '../data/fretboard';
 import { getTargetTime, masteryScore } from '../engine/mastery';
 import { selectNextCell } from '../engine/selection';
@@ -63,11 +63,18 @@ export default function Session({ state, setState, onEnd }: Props) {
     endedRef.current = true;
     const s = stateRef.current;
     const elapsed = Date.now() - sessionStartRef.current;
+    const record: SessionRecord = {
+      date: new Date().toISOString().slice(0, 10),
+      questions: questionCount,
+      correct: correctCount,
+      avgResponseTimeMs: questionCount > 0 ? Math.round(totalResponseTime / questionCount) : 0,
+    };
     const newState = {
       ...s,
       totalSessionsCompleted: s.totalSessionsCompleted + 1,
       totalTimeMs: s.totalTimeMs + elapsed,
-      lastSessionDate: new Date().toISOString().slice(0, 10),
+      lastSessionDate: record.date,
+      sessionHistory: [...(s.sessionHistory ?? []), record],
     };
     setState(newState);
     saveState(newState);

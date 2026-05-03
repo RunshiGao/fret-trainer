@@ -16,6 +16,20 @@ export default function Home({ state, onStartSession }: Props) {
   const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
   const totalMinutes = Math.round(state.totalTimeMs / 60000);
 
+  // Trend: compare last session to 7-session rolling average before it
+  const history = state.sessionHistory ?? [];
+  let trendText: string | null = null;
+  if (history.length >= 2) {
+    const last = history[history.length - 1];
+    const prev = history.slice(-8, -1);
+    const prevAvgTime = prev.reduce((s, r) => s + r.avgResponseTimeMs, 0) / prev.length;
+    const diffMs = prevAvgTime - last.avgResponseTimeMs;
+    if (Math.abs(diffMs) >= 50) {
+      const sign = diffMs > 0 ? '↓' : '↑';
+      trendText = `${sign} ${(Math.abs(diffMs) / 1000).toFixed(1)}s avg response vs recent sessions`;
+    }
+  }
+
   return (
     <div className="flex flex-col items-center px-4 py-8 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold text-white mb-6">Fretboard Trainer</h1>
@@ -32,6 +46,11 @@ export default function Home({ state, onStartSession }: Props) {
         <p>
           Questions: {totalAttempts} &middot; Accuracy: {accuracy}%
         </p>
+        {trendText && (
+          <p className={trendText.startsWith('↓') ? 'text-green-400' : 'text-red-400'}>
+            {trendText}
+          </p>
+        )}
       </div>
 
       <button
